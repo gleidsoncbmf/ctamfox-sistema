@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("OWNER") // OWNER, ADMIN
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  gyms      Gym[]
+}
+
+model Gym {
+  id        String   @id @default(uuid())
+  name      String
+  logoUrl   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  
+  students  Student[]
+  professors Professor[]
+  modalities Modality[]
+  classes    ClassSession[]
+}
+
+model Professor {
+  id        String   @id @default(uuid())
+  name      String
+  specialty String?
+  
+  gymId     String
+  gym       Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  
+  classes   ClassSession[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Modality {
+  id        String   @id @default(uuid())
+  name      String
+  description String?
+  price     Float    @default(0)
+  
+  gymId     String
+  gym       Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  
+  classes   ClassSession[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ClassSession {
+  id        String   @id @default(uuid())
+  name      String
+  schedule  String // e.g. "Mon/Wed 18:00"
+  
+  modalityId String
+  modality   Modality @relation(fields: [modalityId], references: [id], onDelete: Cascade)
+  
+  professorId String
+  professor   Professor @relation(fields: [professorId], references: [id], onDelete: Cascade)
+  
+  gymId     String
+  gym       Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  
+  students  Student[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Student {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?
+  phone     String?
+  
+  gymId     String
+  gym       Gym      @relation(fields: [gymId], references: [id], onDelete: Cascade)
+  
+  classes   ClassSession[]
+  
+  paymentStatus String @default("ACTIVE") // ACTIVE, LATE, INACTIVE
+  
+  payments Payment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Payment {
+  id        String   @id @default(uuid())
+  amount    Float
+  date      DateTime @default(now())
+  method    String?  // Cash, Card, Pix
+  
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+}
