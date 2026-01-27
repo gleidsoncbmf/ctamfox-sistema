@@ -1,5 +1,4 @@
-FROM node:18-slim AS base
-RUN apt-get update && apt-get install -y openssl libssl-dev ca-certificates && rm -rf /var/lib/apt/lists/*
+FROM node:18 AS base
 
 # Install dependencies only when needed
 FROM base AS deps
@@ -19,6 +18,9 @@ COPY . .
 # Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED 1
+
+# Dummy URL for build step (required by some Prisma versions)
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dbname"
 
 # Generate Prisma Client
 RUN npx prisma generate
