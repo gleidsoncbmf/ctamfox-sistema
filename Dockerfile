@@ -37,6 +37,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
+# Install OpenSSL (Required for Prisma)
+RUN apk add --no-cache openssl
+
 RUN addgroup -g 1001 -S nodejs \
  && adduser -S nextjs -u 1001
 
